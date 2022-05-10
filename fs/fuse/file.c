@@ -1465,6 +1465,28 @@ static ssize_t fuse_direct_write_iter(struct kiocb *iocb, struct iov_iter *from)
 	struct inode *inode = file_inode(iocb->ki_filp);
 	struct fuse_io_priv io = FUSE_IO_PRIV_SYNC(iocb);
 	ssize_t res;
+	// struct file *file = iocb->ki_filp;
+	// struct fuse_file *ff = file->private_data;
+	struct fuse_io_priv io = FUSE_IO_PRIV_SYNC(iocb);
+	ssize_t res;
+	//HACK: due to lacking support in Android rom, and no issues without locking
+	//bool p_write = ff->open_flags & FOPEN_PARALLEL_WRITES ? true : false;
+	bool p_write = true;
+	bool exclusive_lock = !p_write ||
+                       fuse_direct_write_extending_i_size(iocb, from) ?
+                       true : false;
+
+	/*
+	 * Take exclusive lock if
+	 * - parallel writes are disabled.
+	 * - parallel writes are enabled and i_size is being extended
+	 * Take shared lock if
+	 * - parallel writes are enabled but i_size does not extend.
+	 */
+	if (exclusive_lock)
+            inode_lock(inode);
+	else
+            inode_lock_shared(inode);
 
 	if (fuse_is_bad(inode))
 		return -EIO;
