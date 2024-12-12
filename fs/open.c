@@ -397,11 +397,9 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 	struct vfsmount *mnt;
 	int res;
 	unsigned int lookup_flags = LOOKUP_FOLLOW;
-<<<<<<< HEAD
 	#ifdef CONFIG_KSU
 		ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
 	#endif
-=======
 
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
        struct filename* fname;
@@ -412,7 +410,6 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 #ifdef CONFIG_KSU
 	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
 #endif
->>>>>>> ea3171a39b3f (fs: Introduce SUSFS for KSU)
 
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
        fname = getname_safe(filename);
